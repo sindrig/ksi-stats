@@ -117,6 +117,10 @@ def get_games(team, f, t):
 @cache
 def get_events(team, game_id):
     result = client.service.LeikurAtburdir(LeikurNumer=game_id)
+    if not result.ArrayLeikurAtburdir or not hasattr(
+        result.ArrayLeikurAtburdir, 'LeikurAtburdir'
+    ):
+        return []
     return [
         parse_event(event) for event in
         result.ArrayLeikurAtburdir.LeikurAtburdir
@@ -127,6 +131,10 @@ def get_events(team, game_id):
 @cache
 def get_players(team, game_id):
     result = client.service.LeikurLeikmenn(LeikurNumer=game_id)
+    if not result.ArrayLeikurLeikmenn or not hasattr(
+        result.ArrayLeikurLeikmenn, 'LeikurLeikmenn'
+    ):
+        return []
     return [
         parse_player(player) for player in
         result.ArrayLeikurLeikmenn.LeikurLeikmenn
