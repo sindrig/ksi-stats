@@ -5,6 +5,7 @@ import hashlib
 import pickle
 
 from suds.client import Client
+from suds import WebFault
 
 WSDL_URL = 'http://www2.ksi.is/vefthjonustur/mot.asmx?WSDL'
 MFL = '111'
@@ -89,7 +90,7 @@ def cache(f):
 
 
 @cache
-def get_games(team, f, t):
+def get_games(team, f, t, flokkur_id=MFL):
     max_days = 364
     games = []
     while f < t:
@@ -97,7 +98,7 @@ def get_games(team, f, t):
             FelagNumer=team,
             DagsFra=f,
             DagsTil=min(f + datetime.timedelta(max_days), t),
-            FlokkurNumer=MFL,
+            FlokkurNumer=flokkur_id,
             VollurNumer='',
             Kyn=''
         )
@@ -116,7 +117,10 @@ def get_games(team, f, t):
 
 @cache
 def get_events(team, game_id):
-    result = client.service.LeikurAtburdir(LeikurNumer=game_id)
+    try:
+        result = client.service.LeikurAtburdir(LeikurNumer=game_id)
+    except WebFault:
+        return []
     if not result.ArrayLeikurAtburdir or not hasattr(
         result.ArrayLeikurAtburdir, 'LeikurAtburdir'
     ):
